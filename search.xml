@@ -31,17 +31,6 @@
     
     
     <entry>
-      <title>关于</title>
-      <link href="/about/index.html"/>
-      <url>/about/index.html</url>
-      
-        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>留言板</title>
       <link href="/comment/index.html"/>
       <url>/comment/index.html</url>
@@ -53,20 +42,20 @@
     
     
     <entry>
-      <title>相册</title>
-      <link href="/photos/index.html"/>
-      <url>/photos/index.html</url>
+      <title>关于</title>
+      <link href="/about/index.html"/>
+      <url>/about/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="这个也是"><a href="#这个也是" class="headerlink" title="这个也是"></a>这个也是</h1>]]></content>
+        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
       
     </entry>
     
     
     
     <entry>
-      <title>音乐</title>
-      <link href="/music/index.html"/>
-      <url>/music/index.html</url>
+      <title>友情链接</title>
+      <link href="/link/index.html"/>
+      <url>/link/index.html</url>
       
         <content type="html"><![CDATA[]]></content>
       
@@ -86,17 +75,6 @@
     
     
     <entry>
-      <title>友情链接</title>
-      <link href="/link/index.html"/>
-      <url>/link/index.html</url>
-      
-        <content type="html"><![CDATA[]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>分享</title>
       <link href="/shuoshuo/index.html"/>
       <url>/shuoshuo/index.html</url>
@@ -108,9 +86,31 @@
     
     
     <entry>
+      <title>相册</title>
+      <link href="/photos/index.html"/>
+      <url>/photos/index.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="这个也是"><a href="#这个也是" class="headerlink" title="这个也是"></a>这个也是</h1>]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>标签</title>
       <link href="/tags/index.html"/>
       <url>/tags/index.html</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>音乐</title>
+      <link href="/music/index.html"/>
+      <url>/music/index.html</url>
       
         <content type="html"><![CDATA[]]></content>
       
