@@ -20,17 +20,6 @@
     
     
     <entry>
-      <title>关于</title>
-      <link href="/about/index.html"/>
-      <url>/about/index.html</url>
-      
-        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>分类</title>
       <link href="/categories/index.html"/>
       <url>/categories/index.html</url>
@@ -64,11 +53,22 @@
     
     
     <entry>
-      <title>音乐</title>
-      <link href="/music/index.html"/>
-      <url>/music/index.html</url>
+      <title>关于</title>
+      <link href="/about/index.html"/>
+      <url>/about/index.html</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>影视</title>
+      <link href="/movies/index.html"/>
+      <url>/movies/index.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="应该不会写这个地方"><a href="#应该不会写这个地方" class="headerlink" title="应该不会写这个地方"></a>应该不会写这个地方</h1><p>如果有，再说</p>]]></content>
       
     </entry>
     
@@ -97,11 +97,11 @@
     
     
     <entry>
-      <title>影视</title>
-      <link href="/movies/index.html"/>
-      <url>/movies/index.html</url>
+      <title>音乐</title>
+      <link href="/music/index.html"/>
+      <url>/music/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="应该不会写这个地方"><a href="#应该不会写这个地方" class="headerlink" title="应该不会写这个地方"></a>应该不会写这个地方</h1><p>如果有，再说</p>]]></content>
+        <content type="html"><![CDATA[    <div id="aplayer-XeGsyvfe" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
       
     </entry>
     
