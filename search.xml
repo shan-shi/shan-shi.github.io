@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>pwn笔记(一)</title>
+      <link href="/2022/12/28/2022-12-28pwn%E7%AC%94%E8%AE%B0-%E4%B8%80/"/>
+      <url>/2022/12/28/2022-12-28pwn%E7%AC%94%E8%AE%B0-%E4%B8%80/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>exploit：</p><blockquote><p>用于攻击的脚本与方案</p></blockquote></blockquote><blockquote><p>payload:</p><blockquote><p>攻击载荷，是让目的进程被劫持控制流的数据</p></blockquote></blockquote><blockquote><p>shellcode:</p><blockquote><p>调用攻击目标的shell的代码</p></blockquote></blockquote><p>[TOC]</p><h1 id="程序的编译与链接"><a href="#程序的编译与链接" class="headerlink" title="程序的编译与链接"></a>程序的编译与链接</h1><h2 id="从C源代码到可执行文件的生成过程："><a href="#从C源代码到可执行文件的生成过程：" class="headerlink" title="从C源代码到可执行文件的生成过程："></a>从C源代码到可执行文件的生成过程：</h2><ol><li><p>编译：<br> 由C语言代码生成汇编代码</p></li><li><p>汇编：</p></li></ol><p>  由汇编代码生成机器码</p><ol start="3"><li><p>链接</p><p>将多个机器码的目标文件链接成一个可执行的文件</p></li></ol><p>以下是用”gcc &lt;文件名&gt;”这个命令所发生的一系列过程:</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200525.png"></p><p>整个过程：</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200844.png"></p><h2 id="什么是可执行文件？"><a href="#什么是可执行文件？" class="headerlink" title="什么是可执行文件？"></a>什么是可执行文件？</h2><p>一. 广义：文件中的数据是可执行代码的文件(只要能够运行)</p><p>​.out、.exe、.sh、.py</p><p>二. 狭义：文件中的数据是机器码的文件</p><p>​.out、.exe、.dll、.so</p><p>可执行文件的分类：</p><table><thead><tr><th></th><th>Windows: PE(Portable Executable)</th><th>Linux: ELF (Exexutable and Linkable Format)</th></tr></thead><tbody><tr><td>可执行程序</td><td>.exe</td><td>.out</td></tr><tr><td>动态链接库</td><td>.dll</td><td>.so</td></tr><tr><td>静态链接库</td><td>.lib</td><td>.a</td></tr></tbody></table><p><label style="color:yellow">“gcc &lt;文件名&gt;” 命令产生的文件目前存放在磁盘中，是ELF文件，当你打开后，该文件会加载到内存中（此时就不叫ELF）</label> </p><h2 id="ELF文件结构"><a href="#ELF文件结构" class="headerlink" title="ELF文件结构"></a>ELF文件结构</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103204214.png"></p><p>ELF：</p><ul><li><p>header</p><ul><li>ELF header：记录整个ELF文件的整个结构分布</li><li>Program Header Table: 主要记录一些段的信息</li></ul></li><li><p>sections</p><ul><li>Code <del>后面会是Code段</del> ： 记录不同的机械码的分区，不同的分区有不同的功能，不同的功能被划分成不同的代码节（用户： .text节）  </li><li>Data <del>同理后面会是Data段</del> ： 不能被执行，存放数据（got节:记录全局偏移量的地址,Dynamic节：存放动态链接的数据 ）</li><li>Sections’ names: 记录了各个节的节名（字典）</li></ul></li><li><p>Header </p><ul><li>Section Header Table: 包含了描述文件节区的信息，每个节区在表中都有一项，每一项给出诸如节区名称、节区大小这类信息。</li></ul></li></ul><blockquote><p>段：当程序加载到内存中成为进程的时候，进行读、写、执行、权限划分的一个视图</p><p>节：elf文件存放在磁盘中，进行不同功能区域划分的一个视图</p></blockquote><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103212006.png"></p><h1 id="程序装载与虚拟内存"><a href="#程序装载与虚拟内存" class="headerlink" title="程序装载与虚拟内存"></a>程序装载与虚拟内存</h1><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103214324.png"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 学习 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> pwn </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>我的第一篇文章</title>
       <link href="/2022/12/24/%E6%88%91%E7%9A%84%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0/"/>
       <url>/2022/12/24/%E6%88%91%E7%9A%84%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0/</url>
@@ -31,20 +56,20 @@
     
     
     <entry>
-      <title>留言板</title>
-      <link href="/comment/index.html"/>
-      <url>/comment/index.html</url>
+      <title>分类</title>
+      <link href="/categories/index.html"/>
+      <url>/categories/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="留什么言，发QQ或者微信不好吗"><a href="#留什么言，发QQ或者微信不好吗" class="headerlink" title="留什么言，发QQ或者微信不好吗"></a>留什么言，发QQ或者微信不好吗</h1>]]></content>
+        <content type="html"><![CDATA[]]></content>
       
     </entry>
     
     
     
     <entry>
-      <title>分类</title>
-      <link href="/categories/index.html"/>
-      <url>/categories/index.html</url>
+      <title>友情链接</title>
+      <link href="/link/index.html"/>
+      <url>/link/index.html</url>
       
         <content type="html"><![CDATA[]]></content>
       
@@ -64,11 +89,11 @@
     
     
     <entry>
-      <title>友情链接</title>
-      <link href="/link/index.html"/>
-      <url>/link/index.html</url>
+      <title>留言板</title>
+      <link href="/comment/index.html"/>
+      <url>/comment/index.html</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="留什么言，发QQ或者微信不好吗"><a href="#留什么言，发QQ或者微信不好吗" class="headerlink" title="留什么言，发QQ或者微信不好吗"></a>留什么言，发QQ或者微信不好吗</h1>]]></content>
       
     </entry>
     
@@ -79,7 +104,7 @@
       <link href="/music/index.html"/>
       <url>/music/index.html</url>
       
-        <content type="html"><![CDATA[    <div id="aplayer-sNRoykRy" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
+        <content type="html"><![CDATA[    <div id="aplayer-fbMLyXrw" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
       
     </entry>
     
@@ -97,22 +122,22 @@
     
     
     <entry>
-      <title>相册</title>
-      <link href="/photos/index.html"/>
-      <url>/photos/index.html</url>
+      <title>标签</title>
+      <link href="/tags/index.html"/>
+      <url>/tags/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="这个也是"><a href="#这个也是" class="headerlink" title="这个也是"></a>这个也是</h1>]]></content>
+        <content type="html"><![CDATA[]]></content>
       
     </entry>
     
     
     
     <entry>
-      <title>标签</title>
-      <link href="/tags/index.html"/>
-      <url>/tags/index.html</url>
+      <title>相册</title>
+      <link href="/photos/index.html"/>
+      <url>/photos/index.html</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="这个也是"><a href="#这个也是" class="headerlink" title="这个也是"></a>这个也是</h1>]]></content>
       
     </entry>
     
