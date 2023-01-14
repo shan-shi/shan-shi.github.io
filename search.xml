@@ -8,7 +8,7 @@
       <link href="/2022/12/28/2022-12-28pwn%E7%AC%94%E8%AE%B0-%E4%B8%80/"/>
       <url>/2022/12/28/2022-12-28pwn%E7%AC%94%E8%AE%B0-%E4%B8%80/</url>
       
-        <content type="html"><![CDATA[<blockquote><p>exploit：</p><blockquote><p>用于攻击的脚本与方案</p></blockquote></blockquote><blockquote><p>payload:</p><blockquote><p>攻击载荷，是让目的进程被劫持控制流的数据</p></blockquote></blockquote><blockquote><p>shellcode:</p><blockquote><p>调用攻击目标的shell的代码</p></blockquote></blockquote><p>[TOC]</p><h1 id="程序的编译与链接"><a href="#程序的编译与链接" class="headerlink" title="程序的编译与链接"></a>程序的编译与链接</h1><h2 id="从C源代码到可执行文件的生成过程："><a href="#从C源代码到可执行文件的生成过程：" class="headerlink" title="从C源代码到可执行文件的生成过程："></a>从C源代码到可执行文件的生成过程：</h2><ol><li><p>编译：<br> 由C语言代码生成汇编代码</p></li><li><p>汇编：</p></li></ol><p>  由汇编代码生成机器码</p><ol start="3"><li><p>链接</p><p>将多个机器码的目标文件链接成一个可执行的文件</p></li></ol><p>以下是用”gcc &lt;文件名&gt;”这个命令所发生的一系列过程:</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200525.png"></p><p>整个过程：</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200844.png"></p><h2 id="什么是可执行文件？"><a href="#什么是可执行文件？" class="headerlink" title="什么是可执行文件？"></a>什么是可执行文件？</h2><p>一. 广义：文件中的数据是可执行代码的文件(只要能够运行)</p><p>​.out、.exe、.sh、.py</p><p>二. 狭义：文件中的数据是机器码的文件</p><p>​.out、.exe、.dll、.so</p><p>可执行文件的分类：</p><table><thead><tr><th></th><th>Windows: PE(Portable Executable)</th><th>Linux: ELF (Exexutable and Linkable Format)</th></tr></thead><tbody><tr><td>可执行程序</td><td>.exe</td><td>.out</td></tr><tr><td>动态链接库</td><td>.dll</td><td>.so</td></tr><tr><td>静态链接库</td><td>.lib</td><td>.a</td></tr></tbody></table><table><tr><td bgcolor=PowderBlue><label style="color:blue">"gcc <文件名>" 命令产生的文件目前存放在磁盘中，是ELF文件，当你打开后，该文件会加载到内存中（此时就不叫ELF）</label> </td></tr></table><h2 id="ELF文件结构"><a href="#ELF文件结构" class="headerlink" title="ELF文件结构"></a>ELF文件结构</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103204214.png"></p><p>ELF：</p><ul><li><p>header</p><ul><li>ELF header：记录整个ELF文件的整个结构分布</li><li>Program Header Table: 主要记录一些段的信息</li></ul></li><li><p>sections</p><ul><li>Code <del>后面会是Code段</del> ： 记录不同的机械码的分区，不同的分区有不同的功能，不同的功能被划分成不同的代码节（用户： .text节）  </li><li>Data <del>同理后面会是Data段</del> ： 不能被执行，存放数据（got节:记录全局偏移量的地址,Dynamic节：存放动态链接的数据 ）</li><li>Sections’ names: 记录了各个节的节名（字典）</li></ul></li><li><p>Header </p><ul><li>Section Header Table: 包含了描述文件节区的信息，每个节区在表中都有一项，每一项给出诸如节区名称、节区大小这类信息。</li></ul></li></ul><blockquote><p>段：当程序加载到内存中成为进程的时候，进行读、写、执行、权限划分的一个视图</p><p>节：elf文件存放在磁盘中，进行不同功能区域划分的一个视图</p></blockquote><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103212006.png"></p><h1 id="程序装载与虚拟内存"><a href="#程序装载与虚拟内存" class="headerlink" title="程序装载与虚拟内存"></a>程序装载与虚拟内存</h1><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103214324.png"></p>]]></content>
+        <content type="html"><![CDATA[<blockquote><p>exploit：</p><blockquote><p>用于攻击的脚本与方案</p></blockquote></blockquote><blockquote><p>payload:</p><blockquote><p>攻击载荷，是让目的进程被劫持控制流的数据</p></blockquote></blockquote><blockquote><p>shellcode:</p><blockquote><p>调用攻击目标的shell的代码</p></blockquote></blockquote><p>[TOC]</p><h1 id="程序的编译与链接"><a href="#程序的编译与链接" class="headerlink" title="程序的编译与链接"></a>程序的编译与链接</h1><h2 id="从C源代码到可执行文件的生成过程："><a href="#从C源代码到可执行文件的生成过程：" class="headerlink" title="从C源代码到可执行文件的生成过程："></a>从C源代码到可执行文件的生成过程：</h2><ol><li><p>编译：<br> 由C语言代码生成汇编代码</p></li><li><p>汇编：</p></li></ol><p>  由汇编代码生成机器码</p><ol start="3"><li><p>链接</p><p>将多个机器码的目标文件链接成一个可执行的文件</p></li></ol><p>以下是用”gcc &lt;文件名&gt;”这个命令所发生的一系列过程:</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200525.png"></p><p>整个过程：</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103200844.png"></p><h2 id="什么是可执行文件？"><a href="#什么是可执行文件？" class="headerlink" title="什么是可执行文件？"></a>什么是可执行文件？</h2><p>一. 广义：文件中的数据是可执行代码的文件(只要能够运行)</p><p>​.out、.exe、.sh、.py</p><p>二. 狭义：文件中的数据是机器码的文件</p><p>​.out、.exe、.dll、.so</p><p>可执行文件的分类：</p><table><thead><tr><th></th><th>Windows: PE(Portable Executable)</th><th>Linux: ELF (Exexutable and Linkable Format)</th></tr></thead><tbody><tr><td>可执行程序</td><td>.exe</td><td>.out</td></tr><tr><td>动态链接库</td><td>.dll</td><td>.so</td></tr><tr><td>静态链接库</td><td>.lib</td><td>.a</td></tr></tbody></table><table><tr><td bgcolor=PowderBlue><label style="color:blue">"gcc <文件名>" 命令产生的文件目前存放在磁盘中，是ELF文件，当你打开后，该文件会加载到内存中（此时就不叫ELF）</label> </td></tr></table><h2 id="ELF文件结构"><a href="#ELF文件结构" class="headerlink" title="ELF文件结构"></a>ELF文件结构</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103204214.png"></p><p>ELF：</p><ul><li><p>header</p><ul><li>ELF header：记录整个ELF文件的整个结构分布</li><li>Program Header Table: 主要记录一些段的信息</li></ul></li><li><p>sections</p><ul><li>Code <del>后面会是Code段</del> ： 记录不同的机械码的分区，不同的分区有不同的功能，不同的功能被划分成不同的代码节（用户： .text节）  </li><li>Data <del>同理后面会是Data段</del> ： 不能被执行，存放数据（got节:记录全局偏移量的地址,Dynamic节：存放动态链接的数据 ）</li><li>Sections’ names: 记录了各个节的节名（字典）</li></ul></li><li><p>Header </p><ul><li>Section Header Table: 包含了描述文件节区的信息，每个节区在表中都有一项，每一项给出诸如节区名称、节区大小这类信息。</li></ul></li></ul><blockquote><p>段：当程序加载到内存中成为进程的时候，进行读、写、执行、权限划分的一个视图</p><p>节：elf文件存放在磁盘中，进行不同功能区域划分的一个视图</p></blockquote><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103212006.png"></p><h1 id="程序装载与虚拟内存"><a href="#程序装载与虚拟内存" class="headerlink" title="程序装载与虚拟内存"></a>程序装载与虚拟内存</h1><table><tr><td bgcolor=PowderBlue><label style="color:blue">CPU访问的是主存中的数据</label> </td></tr></table><p>内存算是主存 磁盘是外存（断电任然可以保存数据）</p><p>程序执行时，要从磁盘中“拷贝”到内存中。变成VM（virtual memory）视图。从磁盘中的 程序文件变成内存中的一个进程对应的虚拟内存区域。</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230103214324.png"></p><p>Data段： 由具有读，写权限的节（.data、.bss、.got、.plt）转化</p><p>Code段（text段）： 由没有写的权限，只有读或者具有可读可执行的权限的节（.rodata（read only data）、.text、.init、ELF Header）转化</p><p>查看磁盘结构不仅可以使用IDA Pro，在Linux上，可以使用“objdump -s elf”指令查看。</p><h2 id="在Linux下：使用“cat-x2F-proc-x2F-pid-x2F-maps”命令："><a href="#在Linux下：使用“cat-x2F-proc-x2F-pid-x2F-maps”命令：" class="headerlink" title="在Linux下：使用“cat &#x2F;proc&#x2F;pid&#x2F;maps”命令："></a>在Linux下：使用“cat &#x2F;proc&#x2F;pid&#x2F;maps”命令：</h2><p>原文链接：<a href="https://blog.csdn.net/unix21/article/details/8450042">https://blog.csdn.net/unix21/article/details/8450042</a></p><p>proc&#x2F;“进程PID”&#x2F;maps<br>查看进程的虚拟地址空间是如何使用的。<br>该文件有6列，分别为：<br>地址：库在进程里地址范围<br>权限：虚拟内存的权限，r&#x3D;读，w&#x3D;写,x&#x3D;,s&#x3D;共享,p&#x3D;私有；<br>偏移量：库在进程里地址范围<br>设备：映像文件的主设备号和次设备号；<br>节点：映像文件的节点号；<br>路径: 映像文件的路径<br>每项都与一个vm_area_struct结构成员对应</p><p>例如以下代码：</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//test.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> sh[]=<span class="string">&quot;/bin/sh&quot;</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">init_func</span><span class="params">()</span>&#123;</span><br><span class="line">    setvbuf(<span class="built_in">stdin</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    setvbuf(<span class="built_in">stdout</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    setvbuf(<span class="built_in">stderr</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">char</span> *cmd)</span>&#123;</span><br><span class="line">        system(cmd);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> a[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">    <span class="type">char</span> b[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">    <span class="comment">//char a[1] = &#123;&#x27;b&#x27;&#125;;</span></span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;input:&quot;</span>);</span><br><span class="line">        gets(a);</span><br><span class="line">        <span class="built_in">printf</span>(a);</span><br><span class="line">        <span class="keyword">if</span>(b[<span class="number">0</span>]==<span class="string">&#x27;a&#x27;</span>)&#123;</span><br><span class="line">                func(sh);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>编译成文件名为out的文件（gcc test.c -o out）</p><p>执行该文件 .&#x2F;out</p><p>查看内存进程 <strong>ps au</strong> </p><p>143就是我们需要的pid</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230110154845.png" alt="QQ截图20230110154845"></p><p>cat proc&#x2F;143&#x2F;maps:</p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230110155144.png" alt="QQ截图20230110155144"></p><p>参数 解释<br>address: 0085d000-00872000 虚拟内存区域的起始和终止地址文件所占的地址空间<br>perms:rw-p 权限：r&#x3D;read, w&#x3D;write, x&#x3D;execute, s&#x3D;shared, p&#x3D;private(copy on write)<br>offset: 00000000 虚拟内存区域在被映射文件中的偏移量<br>dev: 03:08 文件的主设备号和次设备号<br>inode: 设备的节点号，0表示没有节点与内存相对应<br>name: &#x2F;lib&#x2F;ld-2.31.so 被映射文件的文件名<br>各共享库的代码段，存放着二进制可执行的机器指令，是由kernel把该库ELF文件的代码段map到虚存空间；<br>各共享库的数据段，存放着程序执行所需的全局变量，是由kernel把ELF文件的数据段map到虚存空间；<br>用户代码段，存放着二进制形式的可执行的机器指令，是由kernel把ELF文件的代码段map到虚存空间；<br>用户数据段之上是代码段，存放着程序执行所需的全局变量，是由kernel把ELF文件的数据段map到虚存空间；<br>用户数据段之下是堆(heap)，当且仅当malloc调用时存在，是由kernel把匿名内存map到虚存空间，堆则在程序中没有调用malloc的情况下不存在；<br>用户数据段之下是栈(stack)，作为进程的临时数据区，是由kernel把匿名内存map到虚存空间，栈空间的增长方向是从高地址到低地址。</p><p><strong><font size='10'>体现了Linux一切皆文件的说法</font></strong></p><h2 id="补充基础知识"><a href="#补充基础知识" class="headerlink" title="补充基础知识"></a>补充基础知识</h2><p><font size='5'>地址以字节编码</font> </p><p>1Byte &#x3D;8bit </p><p><font size="5">常以16进制表示</font> </p><p>0x3c&#x3D;0011 1100 </p><p><font size='4'>虚拟内存<font color="red">用户空间</font>每个进程一份</font></p><p><font size='4'>虚拟内存<font color='red'>内核空间</font>所有进程共享一份</font></p><p><font size='4'>虚拟内存mmap段中的<font color='red'>动态链接库</font>仅在物理内存中装载一份</font></p><p><font size='4'>把高位想象成低地址，低位想象成高地址，像这样：</font></p><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114153743.png" alt="QQ截图20230114153743"></p><h1 id="CPU与进程的执行"><a href="#CPU与进程的执行" class="headerlink" title="CPU与进程的执行"></a>CPU与进程的执行</h1><h2 id="段和节的具体划分"><a href="#段和节的具体划分" class="headerlink" title="段和节的具体划分"></a>段和节的具体划分</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114154419.png" alt="QQ截图20230114154419"></p><p>节： 在磁盘上的可执行文件的一个结构。大多由机器码构成。</p><p>数据段：不是机器码（代码），可能地址或者其他的数据</p><h2 id="c语言代码是怎么变成与段和节的划分的对应关系"><a href="#c语言代码是怎么变成与段和节的划分的对应关系" class="headerlink" title="c语言代码是怎么变成与段和节的划分的对应关系"></a>c语言代码是怎么变成与段和节的划分的对应关系</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114155118.png" alt="QQ截图20230114155118"></p><p>glb : 未初始化的全局变量 ——&gt;Bss（不需要占用磁盘空间，但占用内存空间）</p><p>hello world! ：只读不可写不可执行，放在text段，只读数据（可读可写的数据才会放到data段）</p><p>sum函数 : 被编译后成为数据（机器码，代码）放到text段</p><p>t（局部变量）: 放在栈中</p><p>sum(1,2) : 改行也放在栈中</p><p>ptr : 放在栈中，指向堆上开辟的0x100的空间的首地址</p><h2 id="大端序和小端序"><a href="#大端序和小端序" class="headerlink" title="大端序和小端序"></a>大端序和小端序</h2><p>  <img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114165725.png" alt="QQ截图20230114165725"></p><p><font size='5'>小端序</font></p><p>低低高高：低位存放在小地址，高位存放在大地址</p><p><font size='5'>大端序</font></p><p>高位存放在低地址，低位存放在大地址</p><h2 id="程序的执行过程"><a href="#程序的执行过程" class="headerlink" title="程序的执行过程"></a>程序的执行过程</h2><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114170640.png" alt="QQ截图20230114170640"></p><p>PC: 总是保存了当前在内存中代码段中正在执行的地址</p><p><font size="5">amd64寄存器结构</font></p><ul><li>rax: 8 Bytes</li><li>eax: 4 Bytes</li><li>ax : 2 Bytes</li><li>ah : 1 Bytes</li><li>al : 1 Bytes</li></ul><p><font size='5'>部分寄存器功能</font></p><ul><li><p>RIP-pc(program counter) </p><ul><li>存放下一条执行的指令的偏移地址</li></ul></li><li><p>RSP </p><ul><li>存放当前栈帧的栈顶偏移地址</li></ul></li><li><p>RBP</p><ul><li>存放当前栈帧的栈底偏移地址</li></ul></li><li><p>rax</p><ul><li>通用寄存器，存放函数返回值</li></ul></li></ul><h1 id="装载与汇编"><a href="#装载与汇编" class="headerlink" title="装载与汇编"></a>装载与汇编</h1><p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/QQ%E6%88%AA%E5%9B%BE20230114211426.png" alt="QQ截图20230114211426"></p><p>fork() 另启了一个新进程，在这个新进程中使用execve的系统调用，进入内核状态，内核执行kernel mode中的几个函数，新的进程就会进入_start标签，从而进入目标进程的main函数。</p><p>execve没有返回值</p>]]></content>
       
       
       <categories>
@@ -45,11 +45,33 @@
     
     
     <entry>
-      <title>关于</title>
-      <link href="/about/index.html"/>
-      <url>/about/index.html</url>
+      <title>分类</title>
+      <link href="/categories/index.html"/>
+      <url>/categories/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
+        <content type="html"><![CDATA[]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>友情链接</title>
+      <link href="/link/index.html"/>
+      <url>/link/index.html</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>音乐</title>
+      <link href="/music/index.html"/>
+      <url>/music/index.html</url>
+      
+        <content type="html"><![CDATA[    <div id="aplayer-fgFsRots" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
       
     </entry>
     
@@ -67,22 +89,11 @@
     
     
     <entry>
-      <title>影视</title>
-      <link href="/movies/index.html"/>
-      <url>/movies/index.html</url>
+      <title>关于</title>
+      <link href="/about/index.html"/>
+      <url>/about/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="应该不会写这个地方"><a href="#应该不会写这个地方" class="headerlink" title="应该不会写这个地方"></a>应该不会写这个地方</h1><p>如果有，再说</p>]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>分类</title>
-      <link href="/categories/index.html"/>
-      <url>/categories/index.html</url>
-      
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="计算机类在读，，剩下的后面再写"><a href="#计算机类在读，，剩下的后面再写" class="headerlink" title="计算机类在读，，剩下的后面再写"></a>计算机类在读，，剩下的后面再写</h1>]]></content>
       
     </entry>
     
@@ -100,22 +111,11 @@
     
     
     <entry>
-      <title>音乐</title>
-      <link href="/music/index.html"/>
-      <url>/music/index.html</url>
+      <title>影视</title>
+      <link href="/movies/index.html"/>
+      <url>/movies/index.html</url>
       
-        <content type="html"><![CDATA[    <div id="aplayer-UhhYYELq" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>友情链接</title>
-      <link href="/link/index.html"/>
-      <url>/link/index.html</url>
-      
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="应该不会写这个地方"><a href="#应该不会写这个地方" class="headerlink" title="应该不会写这个地方"></a>应该不会写这个地方</h1><p>如果有，再说</p>]]></content>
       
     </entry>
     
