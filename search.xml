@@ -104,17 +104,6 @@
     
     
     <entry>
-      <title>友情链接</title>
-      <link href="/link/index.html"/>
-      <url>/link/index.html</url>
-      
-        <content type="html"><![CDATA[]]></content>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>关于</title>
       <link href="/about/index.html"/>
       <url>/about/index.html</url>
@@ -130,18 +119,18 @@
       <link href="/music/index.html"/>
       <url>/music/index.html</url>
       
-        <content type="html"><![CDATA[    <div id="aplayer-MsaWKQpO" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
+        <content type="html"><![CDATA[    <div id="aplayer-iMMcAQhU" class="aplayer aplayer-tag-marker meting-tag-marker"         data-id="3166847468" data-server="netease" data-type="playlist" data-mode="circulation" data-autoplay="true" data-mutex="false" data-listmaxheight="400px" data-preload="none" data-theme="#ad7a86"    ></div>]]></content>
       
     </entry>
     
     
     
     <entry>
-      <title>相册</title>
-      <link href="/photos/index.html"/>
-      <url>/photos/index.html</url>
+      <title>友情链接</title>
+      <link href="/link/index.html"/>
+      <url>/link/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="这个也是">这个也是</h1>]]></content>
+        <content type="html"><![CDATA[]]></content>
       
     </entry>
     
@@ -159,6 +148,17 @@
     
     
     <entry>
+      <title>分享</title>
+      <link href="/shuoshuo/index.html"/>
+      <url>/shuoshuo/index.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="还没想好写什么呢">还没想好写什么呢</h1>]]></content>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>影视</title>
       <link href="/movies/index.html"/>
       <url>/movies/index.html</url>
@@ -170,11 +170,11 @@
     
     
     <entry>
-      <title>分享</title>
-      <link href="/shuoshuo/index.html"/>
-      <url>/shuoshuo/index.html</url>
+      <title>相册</title>
+      <link href="/photos/index.html"/>
+      <url>/photos/index.html</url>
       
-        <content type="html"><![CDATA[<h1 id="还没想好写什么呢">还没想好写什么呢</h1>]]></content>
+        <content type="html"><![CDATA[<h1 id="这个也是">这个也是</h1>]]></content>
       
     </entry>
     
